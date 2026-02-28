@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:io';
 
 void main() => runApp(const MyApp());
 
@@ -49,12 +50,37 @@ class NetworkControlPanel extends StatelessWidget{
       print("Connection failed: $e");
     }
   }
+
+  void testWebSocket() async{
+    print("Attempting to open WebSocket connection via dart:io...");
+    try{
+      final socket = await WebSocket.connect("wss://echo.websocket.org");
+      socket.listen((message){
+        print("LIVE FRAME RECEIVING: $message");
+      }, onDone: ()=> print("WebSocket connection closed."));
+
+      print("Sending Websocket frame...");
+      socket.add("Hello GSoC! Can the Network Tab see this specific test?");
+    }catch (e){
+      print ("WebSocket Error: $e");
+    }
+  }
   
-  @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: fetchData, 
-      child: Text("Fetch Data from Internet"),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ElevatedButton(
+          onPressed: fetchData,
+          child: const Text("Test HTTP (Visible in DevTools)"),
+        ),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: testWebSocket,
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+          child: const Text("Test WebSocket (Invisible Frames)"),
+        ),
+      ],
     );
   }
 }
